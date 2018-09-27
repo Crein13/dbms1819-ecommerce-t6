@@ -1,30 +1,30 @@
-var Brand = {
+var Category = {
   list: (client, filter, callback) => {
-    const brandListQuery = `
-      SELECT * FROM brands
+    const categoryListQuery = `
+      SELECT * FROM cateories
       `;
-    client.query(brandListQuery, (req, data) => {
+    client.query(categoryListQuery, (req, data) => {
       console.log(data.rows);
       callback(data.rows);
     });
   },
 
-  mostOrderedBrand: (client, filter, callback) => {
+  mostOrderedCategory: (client, filter, callback) => {
     const query = `
-      SELECT brands.brand_name AS brand_name,
+      SELECT products_category.product_category_name AS category_name,
       ROW_NUMBER() OVER (ORDER BY SUM(orders.quantity) DESC) AS ROW,
       SUM(orders.quantity) as TOTAL
       FROM orders
       INNER JOIN products ON orders.product_id=products.id
-      INNER JOIN brands
-      ON products.brand_id=brands.id
-      GROUP BY brand_name
+      INNER JOIN products_category ON products.category_id=products_category.id
+      GROUP BY category_name
       ORDER BY SUM(orders.quantity) DESC
       LIMIT 3;
     `;
     client.query(query, (req, result) => {
+      // console.log(result.rows);
       callback(result.rows);
     });
   }
 };
-module.exports = Brand;
+module.exports = Category;

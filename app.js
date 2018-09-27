@@ -9,6 +9,11 @@ var config = require('./config.js');
 var { Client } = require('pg');
 console.log('config db', config.db);
 var client = new Client(config.db);
+const Product = require('./models/product');
+// const Brand = require('./models/brand');
+// const Customer = require('./models/customer');
+// const Order = require('./models/order');
+// const Category = require('./models/category');
 
 // connect to database
 client.connect()
@@ -31,10 +36,6 @@ app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 // Set Default extension .handlebars
 app.set('view engine', 'handlebars');
 
-/* app.get('/', function(req, res) {
-res.render('products');
-});
- */
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -63,39 +64,19 @@ app.get('/member/Benz', function (req, res) {
 });
 
 /* ---------- CLIENT SIDE ---------- */
-app.get('/', (req, res) => {
-  client.query('SELECT * FROM products ORDER BY product_id ASC', (req, data) => {
-    var list = [];
-    for (var i = 0; i < data.rows.length; i++) {
-      list.push(data.rows[i]);
-    }
+app.get('/', function (req, res) {
+  Product.list(client, {}, function (products) {
     res.render('client/products', {
-      data: list
+      title: 'Most Popular Shoes',
+      products: products
     });
   });
 });
 
-app.get('/products/:id', (req, res) => {
-  client.query('SELECT products.product_id AS product_id, products.product_name AS product_name, products.category_id AS category_id, products.brand_id AS brand_id, products.product_price AS product_price, products.product_description AS product_description, products.brand_tagline AS brand_tagline, products.product_picture AS product_picture, products.warranty AS warranty, brands.brand_name AS brand_name, brands.brand_description AS brand_description, categories.category_name AS category_name FROM products LEFT JOIN brands ON products.brand_id=brands.brand_id RIGHT JOIN categories ON products.category_id=categories.category_id WHERE products.product_id = ' + req.params.id + ';')
-    .then((results) => {
-      console.log('results?', results);
-      res.render('client/productdetail', {
-        product_name: results.rows[0].product_name,
-        product_description: results.rows[0].product_description,
-        brand_tagline: results.rows[0].brand_tagline,
-        product_price: results.rows[0].product_price,
-        warranty: results.rows[0].warranty,
-        product_picture: results.rows[0].product_picture,
-        brand_name: results.rows[0].brand_name,
-        brand_description: results.rows[0].brand_description,
-        category_name: results.rows[0].category_name,
-        product_id: results.rows[0].product_id
-      });
-    })
-    .catch((err) => {
-      console.log('error', err);
-      res.send('Error!');
-    });
+app.get('/products/:id', function (req, res) {
+  Product.getById(client, req.params.id, function (productData) {
+    res.render('client/productdetail', productData);
+  });
 });
 
 app.get('/login', function (req, res) {
@@ -155,7 +136,7 @@ app.post('/products/:id/send', function (req, res) {
        '<ul>' +
         '<li>Customer Name: ' + req.body.first_name + ' ' + req.body.last_name + '</li>' +
         '<li>Email: ' + req.body.customer_email + '</li>' +
-        '<li>Order ID: ' + req.params.id + '</li>' +
+        '<li>Order ID: ' + req.body.order_id + '</li>' +
         '<li>Product Name: ' + req.body.product_name + '</li>' +
         '<li>Quantity: ' + req.body.quantity + '</li>' +
        '</ul>'
@@ -293,7 +274,7 @@ app.get('/admin/orders', function (req, res) {
   var date = [];
   client.query('SELECT customers.first_name AS first_name,customers.last_name AS last_name,customers.customer_email AS customer_email,products.product_name AS product_name,orders.quantity AS quantity,orders.purchase_date AS purchase_date FROM orders INNER JOIN customers ON customers.customer_id=orders.customer_id INNER JOIN products ON products.product_id=orders.product_id ORDER BY purchase_date DESC;')
     .then((result) => {
-      date = moment('purchase_date').format('llll');
+      date = moment('purchase_date').format('dddd, MMM DD, YYYY h:mm a');
       list = result.rows;
       console.log('results?', result);
       res.render('admin/list_order', {
