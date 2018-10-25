@@ -14,7 +14,7 @@ var Product = {
         categories.category_name AS category_name
       FROM products
       INNER JOIN brands ON products.brand_id = brands.brand_id
-      INNER JOIN categories ON products.category_id = categories_category_id
+      INNER JOIN categories ON products.category_id = categories.category_id
       WHERE products.product_id = ${productId}
       ORDER BY product_id ASC
     `;
