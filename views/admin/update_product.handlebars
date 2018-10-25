@@ -1,13 +1,13 @@
 <div class="create_product">
 <div class="container">
-  <formmethod="POST" action="{{rows.product_id}}/saving">
+  <formmethod="POST" action="{{this.product_id}}/saving">
     <h1 align="center">Update Product</h1>
     <div class="row">   
       <div class="col-25">
         <label for="product_name">Product Name:</label>
       </div>
       <div class="col-75">
-       <input id="product_name" value="{{rows.product_name}}" name="product_name" type="text" required >
+       <input id="product_name" value="{{this.product_name}}" name="product_name" type="text" required >
       </div>
     </div>
 
@@ -42,7 +42,7 @@
         <label for="product_price">Price:</label>
       </div>
       <div class="col-75">
-       <input id="product_price" value="{{rows.product_price}}" name="product_price" type="number" required >
+       <input id="product_price" value="{{this.product_price}}" name="product_price" type="number" required >
       </div>
     </div>
 
@@ -51,7 +51,7 @@
         <label for="product_description">Description:</label>
       </div>
       <div class="col-75">
-        <textarea id="product_description" name="product_description" type="text" rows="3" maxlength="255" style="height:100px">{{rows.product_description}}</textarea>
+        <textarea id="product_description" name="product_description" type="text" rows="3" maxlength="255" style="height:100px">{{this.product_description}}</textarea>
       </div>
     </div>
 
@@ -60,7 +60,7 @@
         <label for="brand_tagline">Tagline:</label>
       </div>
       <div class="col-75">
-      <input id="brand_tagline" value="{{rows.brand_tagline}}" name="brand_tagline" type="text">
+      <input id="brand_tagline" value="{{this.brand_tagline}}" name="brand_tagline" type="text">
       </div>
     </div>
 
@@ -69,7 +69,7 @@
         <label for="product_picture">Product Image:</label>
       </div>
       <div class="col-75">
-      <input id="product_picture" value="{{rows.product_picture}}" name="product_picture" type="text" maxlength="500">
+      <input id="product_picture" value="{{this.product_picture}}" name="product_picture" type="text" maxlength="500">
       </div>
     </div>
 
@@ -78,7 +78,7 @@
         <label for="warranty">Warranty:</label>
       </div>
       <div class="col-75">
-       <input id="warranty" value="{{rows.warranty}}" name="warranty" type="number">
+       <input id="warranty" value="{{this.warranty}}" name="warranty" type="number">
       </div>
     </div>
 
