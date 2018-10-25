@@ -124,7 +124,7 @@ var Order = {
 
   totalSalesLast7days: (client, filter, callback) => {
     const query = `
-      SELECT SUM(orders.quantity * products.price)
+      SELECT SUM(orders.quantity * products.product_price)
       FROM orders
       INNER JOIN products ON products.id = orders.product_id
       INNER JOIN customers ON customers.id = orders.customer_id
