@@ -126,8 +126,8 @@ var Order = {
     const query = `
       SELECT SUM(orders.quantity * products.product_price)
       FROM orders
-      INNER JOIN products ON products.id = orders.product_id
-      INNER JOIN customers ON customers.id = orders.customer_id
+      INNER JOIN products ON products.product_id = orders.product_id
+      INNER JOIN customers ON customers.customer_id = orders.customer_id
       WHERE purchase_date BETWEEN CURRENT_DATE - INTERVAL '7 DAYS'
       AND CURRENT_DATE + INTERVAL '1 DAYS';
     `;
@@ -139,10 +139,10 @@ var Order = {
 
   totalSalesLast30days: (client, filter, callback) => {
     const query = `
-      SELECT SUM(orders.quantity * products.price)
+      SELECT SUM(orders.quantity * products.product_price)
       FROM orders
-      INNER JOIN products ON products.id = orders.product_id
-      INNER JOIN customers ON customers.id = orders.customer_id
+      INNER JOIN products ON products.product_id = orders.product_id
+      INNER JOIN customers ON customers.customer_id = orders.customer_id
       WHERE purchase_date BETWEEN CURRENT_DATE - INTERVAL '30 DAYS'
       AND CURRENT_DATE + INTERVAL '1 DAYS';
     `;
