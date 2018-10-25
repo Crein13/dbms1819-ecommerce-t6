@@ -4,16 +4,23 @@ var exphbs = require('express-handlebars');
 var bodyParser = require('body-parser');
 var nodemailer = require('nodemailer');
 var moment = require('moment');
+var Handlebars = require('handlebars');
+var MomentHandler = require('handlebars.moment');
+MomentHandler.registerHelpers(Handlebars);
+
+// Server Connection
 var port = process.env.PORT || 3000;
 var config = require('./config.js');
 var { Client } = require('pg');
 console.log('config db', config.db);
 var client = new Client(config.db);
+
+// Models
 const Product = require('./models/product');
-// const Brand = require('./models/brand');
-// const Customer = require('./models/customer');
-// const Order = require('./models/order');
-// const Category = require('./models/category');
+const Brand = require('./models/brand');
+const Customer = require('./models/customer');
+const Order = require('./models/order');
+const Category = require('./models/category');
 
 // connect to database
 client.connect()
@@ -36,7 +43,7 @@ app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 // Set Default extension .handlebars
 app.set('view engine', 'handlebars');
 
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.get('/member/Gerald', function (req, res) {
@@ -65,9 +72,12 @@ app.get('/member/Benz', function (req, res) {
 
 /* ---------- CLIENT SIDE ---------- */
 app.get('/', function (req, res) {
+  res.render('client/home');
+});
+
+app.get('/products', function (req, res) {
   Product.list(client, {}, function (products) {
     res.render('client/products', {
-      title: 'Most Popular Shoes',
       products: products
     });
   });
@@ -80,7 +90,7 @@ app.get('/products/:id', function (req, res) {
 });
 
 app.get('/login', function (req, res) {
-  res.render('login');
+  res.render('client/login');
 });
 
 app.get('/brands', function (req, res) {
@@ -162,7 +172,90 @@ app.post('/products/:id/send', function (req, res) {
 });
 
 /* -------- ADMIN SIDE -------- */
-app.get('/admin', (req, res) => {
+app.get('/admin', function (req, res) {
+  var thisDay;
+  var oneDayAgo;
+  var twoDaysAgo;
+  var threeDaysAgo;
+  var fourDaysAgo;
+  var fiveDaysAgo;
+  var sixDaysAgo;
+  var sevenDaysAgo;
+  var totalSalesLast7days;
+  var totalSalesLast30days;
+  var mostOrderedProduct;
+  var leastOrderedProduct;
+  var mostOrderedBrand;
+  var mostOrderedCategory;
+  var topCustomersMostOrder;
+  Order.thisDay(client, {}, function (result) {
+    thisDay = result;
+  });
+  Order.oneDayAgo(client, {}, function (result) {
+    oneDayAgo = result;
+  });
+  Order.twoDaysAgo(client, {}, function (result) {
+    twoDaysAgo = result;
+  });
+  Order.threeDaysAgo(client, {}, function (result) {
+    threeDaysAgo = result;
+  });
+  Order.fourDaysAgo(client, {}, function (result) {
+    fourDaysAgo = result;
+  });
+  Order.fiveDaysAgo(client, {}, function (result) {
+    fiveDaysAgo = result;
+  });
+  Order.sixDaysAgo(client, {}, function (result) {
+    sixDaysAgo = result;
+  });
+  Order.sevenDaysAgo(client, {}, function (result) {
+    sevenDaysAgo = result;
+  });
+  Order.totalSalesLast7days(client, {}, function (result) {
+    totalSalesLast7days = result;
+  });
+  Order.totalSalesLast30days(client, {}, function (result) {
+    totalSalesLast30days = result;
+  });
+  Product.mostOrderedProduct(client, {}, function (result) {
+    mostOrderedProduct = result;
+  });
+  Product.leastOrderedProduct(client, {}, function (result) {
+    leastOrderedProduct = result;
+  });
+  Brand.mostOrderedBrand(client, {}, function (result) {
+    mostOrderedBrand = result;
+  });
+  Category.mostOrderedCategory(client, {}, function (result) {
+    mostOrderedCategory = result;
+  });
+  Customer.topCustomersMostOrder(client, {}, function (result) {
+    topCustomersMostOrder = result;
+  });
+  Customer.topCustomersHighestPayment(client, {}, function (result) {
+    res.render('admin/home', {
+      topCustomersHighestPayment: result,
+      thisDay: thisDay[0].count,
+      oneDayAgo: oneDayAgo[0].count,
+      twoDaysAgo: twoDaysAgo[0].count,
+      threeDaysAgo: threeDaysAgo[0].count,
+      fourDaysAgo: fourDaysAgo[0].count,
+      fiveDaysAgo: fiveDaysAgo[0].count,
+      sixDaysAgo: sixDaysAgo[0].count,
+      sevenDaysAgo: sevenDaysAgo[0].count,
+      totalSalesLast7days: totalSalesLast7days[0].sum,
+      totalSalesLast30days: totalSalesLast30days[0].sum,
+      mostOrderedProduct: mostOrderedProduct,
+      leastOrderedProduct: leastOrderedProduct,
+      mostOrderedBrand: mostOrderedBrand,
+      mostOrderedCategory: mostOrderedCategory,
+      topCustomersMostOrder: topCustomersMostOrder
+    });
+  });
+});
+
+app.get('/admin/products', (req, res) => {
   client.query('SELECT * FROM products ORDER BY product_id ASC', (req, data) => {
     var list = [];
     for (var i = 0; i < data.rows.length; i++) {
@@ -175,8 +268,10 @@ app.get('/admin', (req, res) => {
   });
 });
 
-app.get('/login', function (req, res) {
-  res.render('login');
+app.get('/admin/login', function (req, res) {
+  res.render('admin/login', {
+    layout: 'admin'
+  });
 });
 
 app.get('/admin/brands', function (req, res) {

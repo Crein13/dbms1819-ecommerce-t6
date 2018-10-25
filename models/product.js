@@ -46,19 +46,17 @@ var Product = {
   },
 
   mostOrderedProduct: (client, filter, callback) => {
-    const query = `
-      SELECT products.name AS products_name,
+    const query = `SELECT products.product_name AS product_name,
       ROW_NUMBER() OVER (ORDER BY SUM(orders.quantity) DESC) AS ROW,
       SUM(orders.quantity) AS TOTAL
       FROM orders
-      INNER JOIN products ON orders.product_id = products.id
-      GROUP BY products_name
+      INNER JOIN products ON orders.product_id = products.product_id
+      GROUP BY product_name
       ORDER BY SUM(orders.quantity) DESC
-      LIMIT 10;
-    `;
-    client.query(query, (req, result) => {
-      // console.log(result.rows);
-      callback(result.rows);
+      LIMIT 2`;
+    client.query(query, (req, results) => {
+      console.log(results.rows);
+      callback(results.rows);
     });
   },
 
@@ -68,7 +66,7 @@ var Product = {
       ROW_NUMBER() OVER (ORDER BY SUM(orders.quantity) ASC) AS ROW,
       SUM(orders.quantity) AS TOTAL
       FROM orders
-      INNER JOIN products ON orders.product_id = products.id
+      INNER JOIN products ON orders.product_id = products.product_id
       GROUP BY products_name
       ORDER BY SUM(orders.quantity) ASC
       LIMIT 10;
