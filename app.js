@@ -463,7 +463,7 @@ app.get('/product/update/:id', function (req, res) {
       both.push(product);
       console.log(product);
       console.log(both);
-      res.render('update_product', {
+      res.render('admin/update_product', {
         rows: result.rows[0],
         brand: both,
         layout: 'admin'
