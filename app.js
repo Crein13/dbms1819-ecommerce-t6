@@ -273,7 +273,8 @@ app.get('/admin', function (req, res) {
 // });
 
 app.get('/admin/products', (req, res) => {
-  Product.getById(client, {}, function (products) {
+  var id = req.params.id;
+  Product.getById(client, {id: id}, function (products) {
     res.render('admin/products', {
       layout: 'admin',
       products: products
