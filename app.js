@@ -185,8 +185,8 @@ app.get('/admin', function (req, res) {
   var fiveDaysAgo;
   var sixDaysAgo;
   var sevenDaysAgo;
-  var totalSalesLast7days;
-  var totalSalesLast30days;
+  // var totalSalesLast7days;
+  // var totalSalesLast30days;
   var mostOrderedProduct;
   var leastOrderedProduct;
   var mostOrderedBrand;
@@ -216,12 +216,12 @@ app.get('/admin', function (req, res) {
   Order.sevenDaysAgo(client, {}, function (result) {
     sevenDaysAgo = result;
   });
-  Order.totalSalesLast7days(client, {}, function (result) {
-    totalSalesLast7days = result;
-  });
-  Order.totalSalesLast30days(client, {}, function (result) {
-    totalSalesLast30days = result;
-  });
+  // Order.totalSalesLast7days(client, {}, function (result) {
+  //   totalSalesLast7days = result;
+  // });
+  // Order.totalSalesLast30days(client, {}, function (result) {
+  //   totalSalesLast30days = result;
+  // });
   Product.mostOrderedProduct(client, {}, function (result) {
     mostOrderedProduct = result;
   });
@@ -248,8 +248,8 @@ app.get('/admin', function (req, res) {
       fiveDaysAgo: fiveDaysAgo[0].count,
       sixDaysAgo: sixDaysAgo[0].count,
       sevenDaysAgo: sevenDaysAgo[0].count,
-      totalSalesLast7days: totalSalesLast7days[0].sum,
-      totalSalesLast30days: totalSalesLast30days[0].sum,
+      // totalSalesLast7days: totalSalesLast7days[0].sum,
+      // totalSalesLast30days: totalSalesLast30days[0].sum,
       mostOrderedProduct: mostOrderedProduct,
       leastOrderedProduct: leastOrderedProduct,
       mostOrderedBrand: mostOrderedBrand,
