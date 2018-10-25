@@ -132,7 +132,7 @@ var Order = {
       AND CURRENT_DATE + INTERVAL '1 DAYS';
     `;
     client.query(query, (req, result) => {
-      console.log(result.rows);
+      // console.log(result.rows);
       callback(result.rows);
     });
   },

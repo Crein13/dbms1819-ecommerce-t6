@@ -72,7 +72,11 @@ app.get('/member/Benz', function (req, res) {
 
 /* ---------- CLIENT SIDE ---------- */
 app.get('/', function (req, res) {
-  res.render('client/products');
+  Product.list(client, {}, function (products) {
+    res.render('client/products', {
+      products: products
+    });
+  });
 });
 
 app.get('/products', function (req, res) {
