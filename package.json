@@ -22,6 +22,7 @@
     "express": "^4.16.4",
     "express-handlebars": "^3.0.0",
     "handlebars.moment": "^1.0.4",
+    "handlebars.numeral": "^0.2.0",
     "husky": "^0.14.3",
     "jquery": "^3.3.1",
     "lint-staged": "^7.3.0",

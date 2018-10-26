@@ -7,6 +7,8 @@ var moment = require('moment');
 var Handlebars = require('handlebars');
 var MomentHandler = require('handlebars.moment');
 MomentHandler.registerHelpers(Handlebars);
+var NumeralHelper = require('handlebars.numeral');
+NumeralHelper.registerHelpers(Handlebars);
 
 // Server Connection
 var port = process.env.PORT || 3000;
