@@ -35,3 +35,5 @@ const config = {
 };
 
 module.exports = process.env.NODE_ENV === 'production' ? config.production : config.development;
+
+//  heroku pg:psql postgresql-shaped-24923 --app dbms1819-ecommerce-t6
