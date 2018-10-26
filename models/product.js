@@ -20,7 +20,7 @@ var Product = {
     `;
     client.query(productQuery, (req, results) => {
       console.log(req);
-      console.log(results.rows[0]);
+      // console.log(results.rows[0]);
       var productData = {
         product_name: results.rows[0].product_name,
         product_description: results.rows[0].product_description,
