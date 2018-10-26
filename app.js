@@ -273,10 +273,10 @@ app.get('/admin', function (req, res) {
 // });
 
 app.get('/admin/products', (req, res) => {
-  Product.getById(client, {}, function (products) {
+  Product.list(client, {}, function (products) {
     res.render('admin/products', {
-      layout: 'admin',
-      data: products
+      products: products,
+      layout: 'admin'
     });
   });
 });
