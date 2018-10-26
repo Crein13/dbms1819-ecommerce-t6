@@ -1,7 +1,7 @@
 var Category = {
   list: (client, filter, callback) => {
     const categoryListQuery = `
-      SELECT * FROM cateories
+      SELECT * FROM categories
       `;
     client.query(categoryListQuery, (req, data) => {
       console.log(data.rows);
@@ -11,12 +11,12 @@ var Category = {
 
   mostOrderedCategory: (client, filter, callback) => {
     const query = `
-      SELECT products_category.product_category_name AS category_name,
+      SELECT categories.category_name AS category_name,
       ROW_NUMBER() OVER (ORDER BY SUM(orders.quantity) DESC) AS ROW,
       SUM(orders.quantity) as TOTAL
       FROM orders
-      INNER JOIN products ON orders.product_id=products.id
-      INNER JOIN products_category ON products.category_id=products_category.id
+      INNER JOIN products ON orders.product_id=products.product_id
+      INNER JOIN categories ON products.category_id=categories.category_id
       GROUP BY category_name
       ORDER BY SUM(orders.quantity) DESC
       LIMIT 3;

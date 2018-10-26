@@ -15,9 +15,9 @@ var Brand = {
       ROW_NUMBER() OVER (ORDER BY SUM(orders.quantity) DESC) AS ROW,
       SUM(orders.quantity) as TOTAL
       FROM orders
-      INNER JOIN products ON orders.product_id=products.id
+      INNER JOIN products ON orders.product_id=products.product_id
       INNER JOIN brands
-      ON products.brand_id=brands.id
+      ON products.brand_id=brands.barnad_id
       GROUP BY brand_name
       ORDER BY SUM(orders.quantity) DESC
       LIMIT 3;

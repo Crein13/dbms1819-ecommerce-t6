@@ -14,7 +14,7 @@ var Customer = {
       FROM orders
       INNER JOIN customers ON orders.customer_id = customers.customer_id
       INNER JOIN products ON orders.product_id = products.product_id
-      WHERE customers.id = ${customerId}
+      WHERE customers.customer_id = ${customerId}
       ORDER BY purchase_date DESC
     `;
     client.query(customerQuery, (req, data) => {
@@ -51,8 +51,8 @@ var Customer = {
         SELECT DISTINCT customers.first_name, customers.last_name,
         SUM (products.price * orders.quantity)
         FROM orders
-        INNER JOIN products ON products.id = orders.product_id
-        INNER JOIN customers ON customers.id = orders.customer_id
+        INNER JOIN products ON products.product_id = orders.product_id
+        INNER JOIN customers ON customers.customer_id = orders.customer_id
         GROUP BY customers.first_name, customers.last_name 
         ORDER BY SUM DESC LIMIT 10;
     `;
@@ -66,7 +66,7 @@ var Customer = {
         SELECT first_name, last_name,
         COUNT (orders.customer_id)
         FROM customers
-        INNER JOIN orders ON orders.customer_id = customers.id
+        INNER JOIN orders ON orders.customer_id = customers.customer_id
         GROUP BY customer_id, customers.first_name, customers.last_name
         ORDER BY COUNT DESC LIMIT 10;
     `;
