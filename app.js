@@ -256,7 +256,8 @@ app.get('/admin', function (req, res) {
       leastOrderedProduct: leastOrderedProduct,
       mostOrderedBrand: mostOrderedBrand,
       mostOrderedCategory: mostOrderedCategory,
-      topCustomersMostOrder: topCustomersMostOrder
+      topCustomersMostOrder: topCustomersMostOrder,
+      layout: 'admin'
     });
   });
 });
