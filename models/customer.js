@@ -67,7 +67,7 @@ var Customer = {
         COUNT (orders.customer_id)
         FROM customers
         INNER JOIN orders ON orders.customer_id = customers.customer_id
-        GROUP BY customer_id, customers.first_name, customers.last_name
+        GROUP BY customers.customer_id, customers.first_name, customers.last_name
         ORDER BY COUNT DESC LIMIT 10;
     `;
     client.query(query, (req, result) => {
