@@ -259,28 +259,27 @@ app.get('/admin', function (req, res) {
   });
 });
 
-app.get('/admin/products', (req, res) => {
-  client.query('SELECT * FROM products ORDER BY product_id ASC', (req, data) => {
-    var list = [];
-    for (var i = 0; i < data.rows.length; i++) {
-      list.push(data.rows[i]);
-    }
-    res.render('admin/products', {
-      layout: 'admin',
-      data: list
-    });
-  });
-});
-
 // app.get('/admin/products', (req, res) => {
-//   var id = req.params.id;
-//   Product.getById(client, {id: id}, function (products) {
+//   client.query('SELECT * FROM products ORDER BY product_id ASC', (req, data) => {
+//     var list = [];
+//     for (var i = 0; i < data.rows.length; i++) {
+//       list.push(data.rows[i]);
+//     }
 //     res.render('admin/products', {
 //       layout: 'admin',
-//       products: products
+//       data: list
 //     });
 //   });
 // });
+
+app.get('/admin/products', (req, res) => {
+  Product.getById(client, {}, function (products) {
+    res.render('admin/products', {
+      layout: 'admin',
+      data: products
+    });
+  });
+});
 
 app.get('/admin/login', function (req, res) {
   res.render('admin/login', {
