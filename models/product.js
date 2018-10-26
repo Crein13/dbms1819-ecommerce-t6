@@ -38,7 +38,7 @@ var Product = {
   },
 
   list: (client, filter, callback) => {
-    const productListQuery = 'SELECT * FROM Products';
+    const productListQuery = 'SELECT * FROM products ORDER BY product_id ASC';
     client.query(productListQuery, (req, data) => {
       console.log(data.rows);
       callback(data.rows);
