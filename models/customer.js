@@ -8,7 +8,7 @@ var Customer = {
         customers.municipality AS municipality,
         customers.province AS province,
         customers.zipcode AS zipcode,
-        products.name AS product_name,
+        products.product_name AS product_name,
         orders.quantity AS quantity,
         orders.purchase_date AS purchase_date
       FROM orders
@@ -49,7 +49,7 @@ var Customer = {
   topCustomersHighestPayment: (client, filter, callback) => {
     const query = `
         SELECT DISTINCT customers.first_name, customers.last_name,
-        SUM (products.price * orders.quantity)
+        SUM (products.product_price * orders.quantity)
         FROM orders
         INNER JOIN products ON products.product_id = orders.product_id
         INNER JOIN customers ON customers.customer_id = orders.customer_id
