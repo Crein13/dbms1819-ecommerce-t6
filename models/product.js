@@ -67,7 +67,7 @@ var Product = {
       SUM(orders.quantity) AS TOTAL
       FROM orders
       INNER JOIN products ON orders.product_id = products.product_id
-      GROUP BY products_name
+      GROUP BY product_name
       ORDER BY SUM(orders.quantity) ASC
       LIMIT 10;
     `;
