@@ -17,7 +17,7 @@ var Brand = {
       FROM orders
       INNER JOIN products ON orders.product_id=products.product_id
       INNER JOIN brands
-      ON products.brand_id=brands.barnad_id
+      ON products.brand_id=brands.brand_id
       GROUP BY brand_name
       ORDER BY SUM(orders.quantity) DESC
       LIMIT 3;
