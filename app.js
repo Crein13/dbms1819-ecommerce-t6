@@ -87,64 +87,45 @@ app.get('/member/Benz', function (req, res) {
 
 // Authentication and Session--------------------------------------------
 passport.use(new Strategy({
-  usernameField: 'customer_email',
+  usernameField: 'email',
   passwordField: 'password'
 },
-function (customer_email, password, cb) {
-  Customer.getByEmail(client, customer_email, function (user) {
-    if (!user) { return cb(null, false); }
-    if (user.password != password) { return cb(null, false); }
-    return cb(null, user);
-  });
-}));
+  function(email, password, cb) {
+    Customer.getByEmail(client,email, function(user) {
+      if (!user) { return cb(null, false); }
+    
+      return cb(null, user);
+    });
+  })
+);
 
-passport.serializeUser(function (user, cb) {
-  console.log('serializeUser', user)
-  cb(null, user.customer_id);
+passport.serializeUser(function(user, cb) {
+  cb(null, user.id);
 });
 
-passport.deserializeUser(function (id, cb) {
-  Customer.getById(customer_id, function (user) {
-    console.log('deserializeUser', user)
+passport.deserializeUser(function(id, cb) {
+  Customer.getById(client,id, function (user) {
     cb(null, user);
   });
 });
 
-function isAdmin (req, res, next) {
-  if (req.isAuthenticated()) {
-    Customer.getCustomerData(client, req.user.customer_id, function (user) {
-      role = req.user.user_type;
-      req.session.admin = req.user.user_type;
-      console.log('role:', role);
-      if (role == 'admin') {
-        req.session.admin == true;
+function isAdmin(req, res, next) {
+   if (req.isAuthenticated()) {
+  Customer.getCustomerData(client,{id: req.user.id}, function(user){
+    role = user[0].user_type;
+    console.log('role:',role);
+    if (role == 'admin') {
         return next();
-      } else {
-        res.send('cannot access!');
-      }
-    });
-  } else {
+    }
+    else{
+      res.send('cannot access!');
+    }
+  });
+  }
+  else{
     res.redirect('/login');
   }
 }
-function isCustomer (req, res, next) {
-  if (req.isAuthenticated()) {
-    Customer.getCustomerData(client, req.user.customer_id, function (user) {
-      role = req.user.user_type;
-      req.session.customer = req.user.user_type;
-      console.log('role:', role);
-      if (role == 'customer') {
-        req.session.customer == true;
-        return next();
-      } else {
-        res.send('cannot access!');
-      }
-    });
-  } else {
-    res.redirect('/login');
-  }
-}
-
 /* -------------LOGIN PAGE ------------- */
 
 app.get('/login', function (req, res) {
@@ -154,14 +135,8 @@ app.get('/login', function (req, res) {
 app.post('/login',
   passport.authenticate('local', { failureRedirect: '/login' }),
   function(req, res) {
-    if (req.user.user_type == 'admin') {
-      res.redirect('/admin');
-    } else if (req.user.user_type == 'customer') {
-      res.redirect('/customer');
-    } else {
-      res.redirect('/login');
-    }
-  });
+    res.redirect('/');
+});
 
 app.get('/signup', function (req, res) {
   res.render('signup', {
@@ -211,6 +186,22 @@ app.get('/', function (req, res) {
   });
 });
 
+app.get('/profile/:id', function (req, res) {
+  var list = [];
+  client.query('SELECT customers.first_name AS first_name,customers.last_name AS last_name,customers.customer_email AS customer_email,customers.street AS street,customers.municipality AS municipality,customers.province AS province,customers.zipcode AS zipcode,products.product_name AS product_name,orders.quantity AS quantity,orders.purchase_date AS purchase_date FROM orders INNER JOIN customers ON customers.customer_id=orders.customer_id INNER JOIN products ON products.product_id=orders.product_id WHERE customers.customer_id = ' + req.params.id + 'ORDER BY purchase_date DESC;')
+    .then((result) => {
+      list = result.rows;
+      console.log('results?', result);
+      res.render('client/profile', {
+        rows: list
+      });
+    })
+    .catch((err) => {
+      console.log('error', err);
+      res.send('Error!');
+    });
+});
+
 app.get('/products', function (req, res) {
   Product.list(client, {}, function (products) {
     res.render('client/products', {
@@ -220,9 +211,13 @@ app.get('/products', function (req, res) {
 });
 
 app.get('/products/:id', function (req, res) {
-  Product.getById(client, req.params.id, function (productData) {
-    res.render('client/productdetail', productData);
-  });
+  if (req.isAuthenticated()){
+    Product.getById(client, req.params.id, function (productData) {
+      res.render('client/productdetail', productData);
+    });
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get('/brands', function (req, res) {
@@ -304,7 +299,7 @@ app.post('/products/:id/send', function (req, res) {
 });
 
 /* -------- ADMIN SIDE -------- */
-app.get('/admin', function (req, res) {
+app.get('/admin', isAdmin, function (req, res) {
   var thisDay;
   var oneDayAgo;
   var twoDaysAgo;
@@ -401,7 +396,7 @@ app.get('/admin', function (req, res) {
 //   });
 // });
 
-app.get('/admin/products', (req, res) => {
+app.get('/admin/products', isAdmin, (req, res) => {
   Product.list(client, {}, function (products) {
     res.render('admin/products', {
       products: products,
@@ -410,13 +405,13 @@ app.get('/admin/products', (req, res) => {
   });
 });
 
-app.get('/admin/login', function (req, res) {
+app.get('/admin/login', isAdmin, function (req, res) {
   res.render('admin/login', {
     layout: 'admin'
   });
 });
 
-app.get('/admin/brands', function (req, res) {
+app.get('/admin/brands', isAdmin, function (req, res) {
   var list = [];
   client.query('SELECT * FROM brands;')
     .then((result) => {
@@ -433,7 +428,7 @@ app.get('/admin/brands', function (req, res) {
     });
 });
 
-app.get('/brand/create', function (req, res) {
+app.get('/brand/create', isAdmin, function (req, res) {
   res.render('admin/create_brand', {
     layout: 'admin'
   });
@@ -444,7 +439,7 @@ app.post('/brand/create/saving', function (req, res) {
   res.redirect('/admin/brands');
 });
 
-app.get('/admin/categories', function (req, res) {
+app.get('/admin/categories', isAdmin, function (req, res) {
   var list = [];
   client.query('SELECT * FROM categories')
     .then((result) => {
@@ -461,7 +456,7 @@ app.get('/admin/categories', function (req, res) {
     });
 });
 
-app.get('/category/create', function (req, res) {
+app.get('/category/create', isAdmin, function (req, res) {
   res.render('create_category', {
     layout: 'admin'
   });
@@ -472,7 +467,7 @@ app.post('/category/create/saving', function (req, res) {
   res.redirect('/admin/categories');
 });
 
-app.get('/admin/customers', function (req, res) {
+app.get('/admin/customers', isAdmin, function (req, res) {
   var list = [];
   client.query('SELECT * FROM customers ORDER BY customer_id DESC')
     .then((result) => {
@@ -489,7 +484,7 @@ app.get('/admin/customers', function (req, res) {
     });
 });
 
-app.get('/customer/:id', (req, res) => {
+app.get('/customer/:id', isAdmin, (req, res) => {
   var list = [];
   client.query('SELECT customers.first_name AS first_name,customers.last_name AS last_name,customers.customer_email AS customer_email,customers.street AS street,customers.municipality AS municipality,customers.province AS province,customers.zipcode AS zipcode,products.product_name AS product_name,orders.quantity AS quantity,orders.purchase_date AS purchase_date FROM orders INNER JOIN customers ON customers.customer_id=orders.customer_id INNER JOIN products ON products.product_id=orders.product_id WHERE customers.customer_id = ' + req.params.id + 'ORDER BY purchase_date DESC;')
     .then((result) => {
@@ -506,7 +501,7 @@ app.get('/customer/:id', (req, res) => {
     });
 });
 
-app.get('/admin/orders', function (req, res) {
+app.get('/admin/orders', isAdmin, function (req, res) {
   var list = [];
   var date = [];
   client.query('SELECT customers.first_name AS first_name,customers.last_name AS last_name,customers.customer_email AS customer_email,products.product_name AS product_name,orders.quantity AS quantity,orders.purchase_date AS purchase_date FROM orders INNER JOIN customers ON customers.customer_id=orders.customer_id INNER JOIN products ON products.product_id=orders.product_id ORDER BY purchase_date DESC;')
@@ -526,7 +521,7 @@ app.get('/admin/orders', function (req, res) {
     });
 });
 
-app.get('/product/create', function (req, res) {
+app.get('/product/create', isAdmin, function (req, res) {
   var category = [];
   var brand = [];
   var both = [];
@@ -570,7 +565,7 @@ app.post('/product/create/saving', function (req, res) {
     });
 });
 
-app.get('/product/update/:id', function (req, res) {
+app.get('/product/update/:id', isAdmin, function (req, res) {
   var category = [];
   var brand = [];
   var product = [];
