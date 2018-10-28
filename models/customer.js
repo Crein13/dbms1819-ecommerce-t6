@@ -53,7 +53,7 @@ var Customer = {
     },
   getCustomerData: (client,id,callback) => {
       const query =  `
-          select * from customers where customer_id = '${id.id}'
+          select * from customers where customer_id = '${id.customer_id}'
       `;
       client.query(query,(req,result)=>{
         callback(result.rows);

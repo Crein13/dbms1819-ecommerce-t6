@@ -87,7 +87,7 @@ app.get('/member/Benz', function (req, res) {
 
 // Authentication and Session--------------------------------------------
 passport.use(new Strategy({
-  usernameField: 'email',
+  usernameField: 'customer_email',
   passwordField: 'password'
 },
   function(email, password, cb) {
@@ -100,7 +100,7 @@ passport.use(new Strategy({
 );
 
 passport.serializeUser(function(user, cb) {
-  cb(null, user.id);
+  cb(null, user.customer_id);
 });
 
 passport.deserializeUser(function(id, cb) {
@@ -111,7 +111,7 @@ passport.deserializeUser(function(id, cb) {
 
 function isAdmin(req, res, next) {
    if (req.isAuthenticated()) {
-  Customer.getCustomerData(client,{id: req.user.id}, function(user){
+  Customer.getCustomerData(client,{id: req.user.customer_id}, function(user){
     role = user[0].user_type;
     console.log('role:',role);
     if (role == 'admin') {
