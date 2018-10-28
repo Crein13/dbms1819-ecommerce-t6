@@ -87,11 +87,11 @@ app.get('/member/Benz', function (req, res) {
 
 // Authentication and Session--------------------------------------------
 passport.use(new Strategy({
-  usernameField: 'email',
+  usernameField: 'customer_email',
   passwordField: 'password'
 },
-function (email, password, cb) {
-  Customer.getByEmail(client, email, function (user) {
+function (customer_email, password, cb) {
+  Customer.getByEmail(client, customer_email, function (user) {
     if (!user) { return cb(null, false); }
 
     return cb(null, user);
@@ -100,7 +100,7 @@ function (email, password, cb) {
 );
 
 passport.serializeUser(function (user, cb) {
-  cb(null, user.id);
+  cb(null, user.customer_id);
 });
 
 passport.deserializeUser(function (id, cb) {
@@ -111,7 +111,7 @@ passport.deserializeUser(function (id, cb) {
 
 function isAdmin (req, res, next) {
   if (req.isAuthenticated()) {
-    Customer.getCustomerData(client, {id: req.user.id}, function (user) {
+    Customer.getCustomerData(client, {customer_id: req.user.customer_id}, function (user) {
       role = user[0].user_type;
       console.log('role:', role);
       if (role === 'admin') {
@@ -126,7 +126,7 @@ function isAdmin (req, res, next) {
 }
 function isCustomer (req, res, next) {
   if (req.isAuthenticated()) {
-    Customer.getCustomerData(client, {id: req.user.id}, function (user) {
+    Customer.getCustomerData(client, {customer_id: req.user.customer_id}, function (user) {
       role = user[0].user_type;
       console.log('role:', role);
       if (role === 'customer') {
@@ -149,7 +149,7 @@ app.get('/login', function (req, res) {
 app.post('/login',
   passport.authenticate('local', { failureRedirect: '/login' }),
   function (req, res) {
-    Customer.getById(client, req.user.id, function (user) {
+    Customer.getById(client, req.user.customer_id, function (user) {
       role = user.user_type;
       req.session.user = user;
       console.log(req.session.user);

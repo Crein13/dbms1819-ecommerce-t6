@@ -1,6 +1,7 @@
 var Customer = {
   getById: (client, customerId, callback) => {
     const customerQuery = `SELECT
+        customers.customer_id AS customer_id,
         customers.first_name AS first_name,
         customers.last_name AS last_name,
         customers.customer_email AS customer_email,
@@ -36,15 +37,15 @@ var Customer = {
   },
   getByEmail: (client,email,callback) => {
     const query =  `
-          select * from customers where email = '${email}'
+          select * from customers where customer_email = '${email}'
       `;
       client.query(query,(req,result)=>{
         callback(result.rows[0]);
       });
     },
-  getCustomerData: (client,id,callback) => {
+  getCustomerData: (client,customer_id,callback) => {
       const query =  `
-          select * from customers where id = '${id.id}'
+          select * from customers where customer_id = '${customer_id.customer_id}'
       `;
       client.query(query,(req,result)=>{
         callback(result.rows);
