@@ -144,7 +144,7 @@ app.get('/signup', function (req, res) {
 });
 
 app.post('/signup', (req, res) => {
-  client.query("INSERT INTO customers(first_name, last_name, street, municipality, province, zipcode, email, password, user_type) VALUES ('" + req.body.first_name + "', '" + req.body.last_name + "', '" + req.body.street + "', '" + req.body.municipality + "', '" + req.body.province + "', '" + req.body.zipcode + "', '" + req.body.email + "', '" + req.body.password + "', '" + req.body.user_type + "');");
+  client.query("INSERT INTO customers(first_name, last_name, street, municipality, province, zipcode, customer_email, password, user_type) VALUES ('" + req.body.first_name + "', '" + req.body.last_name + "', '" + req.body.street + "', '" + req.body.municipality + "', '" + req.body.province + "', '" + req.body.zipcode + "', '" + req.body.customer_email + "', '" + req.body.password + "', '" + req.body.user_type + "');");
   res.redirect('/login');
 });
 
@@ -154,7 +154,7 @@ app.get('/forgot-password', function (req, res) {
 });
 
 app.post('/forgotpassword', (req, res) => {
-  client.query('UPDATE customers SET password = '+ req.body.password +'');
+  client.query('UPDATE customers SET password = '+ req.body.password +' WHERE customer_email = '+ req.body.cu +' ');
 });
 
 /* ---------- CLIENT SIDE ---------- */
@@ -225,7 +225,6 @@ app.get('/categories', function (req, res) {
 });
 
 app.post('/products/:id/send', function (req, res) {
-  client.query("INSERT INTO customers (customer_email,first_name,last_name,street,municipality,province,zipcode) VALUES ('" + req.body.customer_email + "','" + req.body.first_name + "','" + req.body.last_name + "','" + req.body.street + "','" + req.body.municipality + "','" + req.body.province + "','" + req.body.zipcode + "') ON CONFLICT (customer_email) DO UPDATE SET first_name = '" + req.body.first_name + "', last_name = '" + req.body.last_name + "', street = '" + req.body.street + "',municipality = '" + req.body.municipality + "',province = '" + req.body.province + "',zipcode = '" + req.body.zipcode + "' WHERE customers.customer_email ='" + req.body.customer_email + "';");
   client.query("SELECT customer_id FROM customers WHERE customer_email = '" + req.body.customer_email + "';")
     .then((results) => {
       var id = results.rows[0].customer_id;
