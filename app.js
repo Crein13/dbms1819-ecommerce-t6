@@ -93,28 +93,29 @@ passport.use(new Strategy({
 function (customer_email, password, cb) {
   Customer.getByEmail(client, customer_email, function (user) {
     if (!user) { return cb(null, false); }
-
+    if (user.password != password) { return cb(null, false); }
     return cb(null, user);
   });
-})
-);
+}));
 
 passport.serializeUser(function (user, cb) {
+  console.log('serializeUser', user)
   cb(null, user.customer_id);
 });
 
 passport.deserializeUser(function (id, cb) {
-  Customer.getById(client, id, function (user) {
+  Customer.getById(customer_id, function (user) {
+    console.log('deserializeUser', user)
     cb(null, user);
   });
 });
 
 function isAdmin (req, res, next) {
   if (req.isAuthenticated()) {
-    Customer.getCustomerData(client, {customer_id: req.user.customer_id}, function (user) {
-      role = user[0].user_type;
+    Customer.getCustomerData(req.user.customer_id, function (user) {
+      role = req.user.user_type;
       console.log('role:', role);
-      if (role === 'admin') {
+      if (role == 'admin') {
         return next();
       } else {
         res.send('cannot access!');
@@ -126,10 +127,10 @@ function isAdmin (req, res, next) {
 }
 function isCustomer (req, res, next) {
   if (req.isAuthenticated()) {
-    Customer.getCustomerData(client, {customer_id: req.user.customer_id}, function (user) {
-      role = user[0].user_type;
+    Customer.getCustomerData(req.user.customer_id, function (user) {
+      role = req.user.user_type;
       console.log('role:', role);
-      if (role === 'customer') {
+      if (role == 'customer') {
         return next();
       } else {
         res.send('cannot access!');
@@ -148,18 +149,14 @@ app.get('/login', function (req, res) {
 
 app.post('/login',
   passport.authenticate('local', { failureRedirect: '/login' }),
-  function (req, res) {
-    Customer.getById(client, req.user.customer_id, function (user) {
-      role = req.user.user_type;
-      req.session.user = user;
-      console.log(req.session.user);
-      console.log('role:', role);
-      if (role === 'customer') {
-        res.redirect('/');
-      } else if (role === 'admin') {
-        res.redirect('/admin');
-      }
-    });
+  function(req, res) {
+    if (req.user.user_type == 'admin') {
+      res.redirect('/admin');
+    } else if (req.user.user_type == 'customer') {
+      res.redirect('/customer');
+    } else {
+      res.redirect('/login');
+    }
   });
 
 app.get('/signup', function (req, res) {
