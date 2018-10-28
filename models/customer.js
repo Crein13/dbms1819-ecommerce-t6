@@ -43,9 +43,9 @@ var Customer = {
       callback(customerData);
     });
   },
-  getByEmail: (client,email,callback) => {
+  getByEmail: (client,customer_email,callback) => {
     const query =  `
-          select * from customers where customer_email = '${email}'
+          select * from customers where customer_email = '${customer_email}'
       `;
       client.query(query,(req,result)=>{
         callback(result.rows[0]);

@@ -91,7 +91,7 @@ passport.use(new Strategy({
   passwordField: 'password'
 },
   function(email, password, cb) {
-    Customer.getByEmail(client,email, function(user) {
+    Customer.getByEmail(client,customer_email, function(user) {
       if (!user) { return cb(null, false); }
     
       return cb(null, user);
@@ -144,25 +144,7 @@ app.get('/signup', function (req, res) {
 });
 
 app.post('/signup', (req, res) => {
-  client.query(`INSERT INTO customers(
-    first_name,
-    last_name,
-    street,
-    municipality,
-    province,
-    zipcode,
-    email,
-    password,
-    user_type)
-    VALUES ('" + req.body.first_name + "',
-    '" + req.body.last_name + "',
-    '" + req.body.street + "',
-    '" + req.body.municipality + "',
-    '" + req.body.province + "',
-    '" + req.body.zipcode + "',
-    '" + req.body.email + "',
-    '" + req.body.password + "',
-    '" + req.body.user_type + "');`);
+  client.query("INSERT INTO customers(first_name, last_name, street, municipality, province, zipcode, email, password, user_type) VALUES ('" + req.body.first_name + "', '" + req.body.last_name + "', '" + req.body.street + "', '" + req.body.municipality + "', '" + req.body.province + "', '" + req.body.zipcode + "', '" + req.body.email + "', '" + req.body.password + "', '" + req.body.user_type + "');");
   res.redirect('/login');
 });
 
@@ -172,9 +154,7 @@ app.get('/forgot-password', function (req, res) {
 });
 
 app.post('/forgotpassword', (req, res) => {
-  client.query(`
-    UPDATE customers
-    SET password = '"+ req.body.password +"' `);
+  client.query('UPDATE customers SET password = '+ req.body.password +'');
 });
 
 /* ---------- CLIENT SIDE ---------- */
