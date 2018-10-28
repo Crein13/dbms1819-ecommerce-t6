@@ -150,7 +150,7 @@ app.post('/login',
   passport.authenticate('local', { failureRedirect: '/login' }),
   function (req, res) {
     Customer.getById(client, req.user.customer_id, function (user) {
-      role = user.user_type;
+      role = req.user.user_type;
       req.session.user = user;
       console.log(req.session.user);
       console.log('role:', role);
