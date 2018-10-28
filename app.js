@@ -104,14 +104,14 @@ passport.serializeUser(function(user, cb) {
 });
 
 passport.deserializeUser(function(id, cb) {
-  Customer.getById(client, id, function (user) {
+  Customer.getById(client, customer_id, function (user) {
     cb(null, user);
   });
 });
 
 function isAdmin(req, res, next) {
    if (req.isAuthenticated()) {
-  Customer.getCustomerData(client,{id: req.user.customer_id}, function(user){
+  Customer.getCustomerData(client,{customer_id: req.user.customer_id}, function(user){
     role = user[0].user_type;
     console.log('role:',role);
     if (role == 'admin') {

@@ -1,7 +1,7 @@
 var Customer = {
-  getById: (client, id, callback) => {
+  getById: (client, customer_id, callback) => {
       const query =  `
-          SELECT * FROM customers WHERE customer_id = '${id}'
+          SELECT * FROM customers WHERE customer_id = '${customer_id}'
       `;
       client.query(query,(req,result)=>{
         callback(result.rows[0]);
@@ -51,9 +51,9 @@ var Customer = {
         callback(result.rows[0]);
       });
     },
-  getCustomerData: (client,id,callback) => {
+  getCustomerData: (client,customer_id,callback) => {
       const query =  `
-          select * from customers where customer_id = '${id.customer_id}'
+          select * from customers where customer_id = '${customer_id.customer_id}'
       `;
       client.query(query,(req,result)=>{
         callback(result.rows);
