@@ -112,10 +112,12 @@ passport.deserializeUser(function (id, cb) {
 
 function isAdmin (req, res, next) {
   if (req.isAuthenticated()) {
-    Customer.getCustomerData(req.user.customer_id, function (user) {
+    Customer.getCustomerData(client, req.user.customer_id, function (user) {
       role = req.user.user_type;
+      req.session.admin = req.user.user_type;
       console.log('role:', role);
       if (role == 'admin') {
+        req.session.admin == true;
         return next();
       } else {
         res.send('cannot access!');
@@ -127,10 +129,12 @@ function isAdmin (req, res, next) {
 }
 function isCustomer (req, res, next) {
   if (req.isAuthenticated()) {
-    Customer.getCustomerData(req.user.customer_id, function (user) {
+    Customer.getCustomerData(client, req.user.customer_id, function (user) {
       role = req.user.user_type;
+      req.session.customer = req.user.user_type;
       console.log('role:', role);
       if (role == 'customer') {
+        req.session.customer == true;
         return next();
       } else {
         res.send('cannot access!');
