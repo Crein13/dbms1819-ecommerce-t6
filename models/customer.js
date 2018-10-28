@@ -1,5 +1,5 @@
 var Customer = {
-  getById: (client,id,callback) => {
+  getById: (client, id, callback) => {
       const query =  `
           SELECT * FROM customers WHERE customer_id = '${id}'
       `;

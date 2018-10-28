@@ -90,8 +90,8 @@ passport.use(new Strategy({
   usernameField: 'customer_email',
   passwordField: 'password'
 },
-  function(email, password, cb) {
-    Customer.getByEmail(client,customer_email, function(user) {
+  function(customer_email, password, cb) {
+    Customer.getByEmail(client, customer_email, function(user) {
       if (!user) { return cb(null, false); }
     
       return cb(null, user);
@@ -104,7 +104,7 @@ passport.serializeUser(function(user, cb) {
 });
 
 passport.deserializeUser(function(id, cb) {
-  Customer.getById(client,id, function (user) {
+  Customer.getById(client, id, function (user) {
     cb(null, user);
   });
 });
