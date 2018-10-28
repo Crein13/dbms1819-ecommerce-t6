@@ -10,6 +10,11 @@ MomentHandler.registerHelpers(Handlebars);
 var NumeralHelper = require('handlebars.numeral');
 NumeralHelper.registerHelpers(Handlebars);
 
+// Authentication
+var passport = require('passport');
+var Strategy = require('passport-local').Strategy;
+var session = require('express-session');
+
 // Server Connection
 var port = process.env.PORT || 3000;
 var config = require('./config.js');
@@ -24,6 +29,16 @@ const Customer = require('./models/customer');
 const Order = require('./models/order');
 const Category = require('./models/category');
 
+var app = express();
+
+var role;
+app.use(session({ secret: 'Team6Secret', resave: false, saveUninitialized: false }));
+
+// Initialize Passport and restore authentication state, if any, from the
+// session.
+app.use(passport.initialize());
+app.use(passport.session());
+
 // connect to database
 client.connect()
   .then(function () {
@@ -33,8 +48,6 @@ client.connect()
     if (err) throw err;
     console.log('Cannot connect to database!');
   });
-
-var app = express();
 
 // Set Public folder
 app.use(express.static(path.join(__dirname, '/public')));
@@ -72,6 +85,122 @@ app.get('/member/Benz', function (req, res) {
   });
 });
 
+// Authentication and Session--------------------------------------------
+passport.use(new Strategy({
+  usernameField: 'email',
+  passwordField: 'password'
+},
+function (email, password, cb) {
+  Customer.getByEmail(client, email, function (user) {
+    if (!user) { return cb(null, false); }
+
+    return cb(null, user);
+  });
+})
+);
+
+passport.serializeUser(function (user, cb) {
+  cb(null, user.id);
+});
+
+passport.deserializeUser(function (id, cb) {
+  Customer.getById(client, id, function (user) {
+    cb(null, user);
+  });
+});
+
+function isAdmin (req, res, next) {
+  if (req.isAuthenticated()) {
+    Customer.getCustomerData(client, {id: req.user.id}, function (user) {
+      role = user[0].user_type;
+      console.log('role:', role);
+      if (role === 'admin') {
+        return next();
+      } else {
+        res.send('cannot access!');
+      }
+    });
+  } else {
+    res.redirect('/login');
+  }
+}
+function isCustomer (req, res, next) {
+  if (req.isAuthenticated()) {
+    Customer.getCustomerData(client, {id: req.user.id}, function (user) {
+      role = user[0].user_type;
+      console.log('role:', role);
+      if (role === 'customer') {
+        return next();
+      } else {
+        res.send('cannot access!');
+      }
+    });
+  } else {
+    res.redirect('/login');
+  }
+}
+
+/* -------------LOGIN PAGE ------------- */
+
+app.get('/login', function (req, res) {
+  res.render('login');
+});
+
+app.post('/login',
+  passport.authenticate('local', { failureRedirect: '/login' }),
+  function (req, res) {
+    Customer.getById(client, req.user.id, function (user) {
+      role = user.user_type;
+      req.session.user = user;
+      console.log(req.session.user);
+      console.log('role:', role);
+      if (role === 'customer') {
+        res.redirect('/');
+      } else if (role === 'admin') {
+        res.redirect('/admin');
+      }
+    });
+  });
+
+app.get('/signup', function (req, res) {
+  res.render('signup', {
+  });
+});
+
+app.post('/signup', (req, res) => {
+  client.query(`INSERT INTO customers(
+    first_name,
+    last_name,
+    street,
+    municipality,
+    province,
+    zipcode,
+    email,
+    password,
+    user_type)
+    VALUES ('" + req.body.first_name + "',
+    '" + req.body.last_name + "',
+    '" + req.body.street + "',
+    '" + req.body.municipality + "',
+    '" + req.body.province + "',
+    '" + req.body.zipcode + "',
+    '" + req.body.email + "',
+    '" + req.body.password + "',
+    '" + req.body.user_type + "');`);
+  res.redirect('/login');
+});
+
+app.get('/forgot-password', function (req, res) {
+  res.render('forgotpassword', {
+  });
+});
+
+app.post('/forgotpassword', (req, res) => {
+  client.query(`
+    UPDATE customers
+    SET password = '"+ req.body.password +"' `);
+});
+
 /* ---------- CLIENT SIDE ---------- */
 app.get('/', function (req, res) {
   Product.list(client, {}, function (products) {
@@ -93,10 +222,6 @@ app.get('/products/:id', function (req, res) {
   Product.getById(client, req.params.id, function (productData) {
     res.render('client/productdetail', productData);
   });
-});
-
-app.get('/login', function (req, res) {
-  res.render('client/login');
 });
 
 app.get('/brands', function (req, res) {

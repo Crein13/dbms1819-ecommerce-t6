@@ -34,7 +34,22 @@ var Customer = {
       callback(customerData);
     });
   },
-
+  getByEmail: (client,email,callback) => {
+    const query =  `
+          select * from customers where email = '${email}'
+      `;
+      client.query(query,(req,result)=>{
+        callback(result.rows[0]);
+      });
+    },
+  getCustomerData: (client,id,callback) => {
+      const query =  `
+          select * from customers where id = '${id.id}'
+      `;
+      client.query(query,(req,result)=>{
+        callback(result.rows);
+      });
+    },
   list: (client, filter, callback) => {
     const customerListQuery = `
       SELECT * FROM customers

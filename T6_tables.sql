@@ -1,3 +1,5 @@
+CREATE TYPE user_type AS ENUM ('admin', 'customer');
+
 CREATE TABLE "customers" (
   "customer_id" SERIAL PRIMARY KEY,
   "customer_email" VARCHAR(80),
@@ -6,7 +8,9 @@ CREATE TABLE "customers" (
   "street" VARCHAR(80),
   "municipality" VARCHAR(80),
   "province" VARCHAR(80),
-  "zipcode" INT
+  "zipcode" INT,
+  "password" VARCHAR(80) NOT NULL,
+  "user_type" user_type default 'customer' NOT NULL
 );
 
 CREATE TABLE "brands" (
