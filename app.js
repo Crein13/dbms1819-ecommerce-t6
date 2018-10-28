@@ -93,17 +93,16 @@ passport.use(new Strategy({
   function(customer_email, password, cb) {
     Customer.getByEmail(client, customer_email, function(user) {
       if (!user) { return cb(null, false); }
-    
+      if (user.password != password) { return cb(null, false); }
       return cb(null, user);
     });
-  })
-);
+}));
 
 passport.serializeUser(function(user, cb) {
   cb(null, user.customer_id);
 });
 
-passport.deserializeUser(function(id, cb) {
+passport.deserializeUser(function(customer_id, cb) {
   Customer.getById(client, customer_id, function (user) {
     cb(null, user);
   });
