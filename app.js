@@ -31,14 +31,6 @@ const Category = require('./models/category');
 
 var app = express();
 
-var role;
-app.use(session({ secret: 'Team6Secret', resave: false, saveUninitialized: false }));
-
-// Initialize Passport and restore authentication state, if any, from the
-// session.
-app.use(passport.initialize());
-app.use(passport.session());
-
 // connect to database
 client.connect()
   .then(function () {
@@ -85,13 +77,23 @@ app.get('/member/Benz', function (req, res) {
   });
 });
 
+// Initialize Passport and restore authentication state, if any, from the
+// session.
+app.use(session({
+  secret: 'Team6Secret',
+  resave: false,
+  saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Authentication and Session--------------------------------------------
 passport.use(new Strategy({
-  usernameField: 'customer_email',
+  usernameField: 'email',
   passwordField: 'password'
 },
-  function(customer_email, password, cb) {
-    Customer.getByEmail(client, customer_email, function(user) {
+  function(email, password, cb) {
+    Customer.getByEmail(client, email, function(user) {
       if (!user) { return cb(null, false); }
       if (user.password != password) { return cb(null, false); }
       return cb(null, user);
@@ -99,21 +101,45 @@ passport.use(new Strategy({
 }));
 
 passport.serializeUser(function(user, cb) {
-  cb(null, user.customer_id);
+  console.log('serializeUser', user)
+  cb(null, user.id);
 });
 
 passport.deserializeUser(function(customer_id, cb) {
-  Customer.getById(client, customer_id, function (user) {
+  Customer.getById(client, id, function (user) {
+    console.log('deserializeUser', user)
     cb(null, user);
   });
 });
 
 function isAdmin(req, res, next) {
-   if (req.isAuthenticated()) {
-  Customer.getCustomerData(client,{customer_id: req.user.customer_id}, function(user){
+  if (req.isAuthenticated()) {
+    Customer.getCustomerData(client,{id: req.user.customer_id}, function(user){
     role = user[0].user_type;
-    console.log('role:',role);
+    req.session.user = user.user_type;
+    console.log(req.session.user)
+    console.log('role:', role);
     if (role == 'admin') {
+        return next();
+    }
+    else{
+      console.log('error', user);
+      res.send('cannot access!');
+    }
+  });
+  }
+  else{
+    console.log('error', user);
+    res.redirect('/login');
+  }
+}
+
+function isCustomer(req, res, next) {
+  if (req.isAuthenticated()) {
+    Customer.getCustomerData(client,{id: req.user.customer_id}, function(user){
+    role = user[0].user_type;
+    console.log('role:', role);
+    if (role == 'customer') {
         return next();
     }
     else{
@@ -125,6 +151,7 @@ function isAdmin(req, res, next) {
     res.redirect('/login');
   }
 }
+
 /* -------------LOGIN PAGE ------------- */
 
 app.get('/login', function (req, res) {
@@ -134,7 +161,18 @@ app.get('/login', function (req, res) {
 app.post('/login',
   passport.authenticate('local', { failureRedirect: '/login' }),
   function(req, res) {
-    res.redirect('/');
+    Customer.getById(client, req.user.customer_id, function(user){
+    role = user.user_type;
+    req.session.user = user.user_type;
+    console.log(req.session.user);
+    console.log('role:', role);
+    if (role == 'customer'){
+        res.redirect('/')
+    }
+    else if (role == 'admin'){
+        res.redirect('/admin')
+    }
+  });
 });
 
 app.get('/signup', function (req, res) {
@@ -153,7 +191,7 @@ app.get('/forgot-password', function (req, res) {
 });
 
 app.post('/forgotpassword', (req, res) => {
-  client.query('UPDATE customers SET password = '+ req.body.password +' WHERE customer_email = '+ req.body.cu +' ');
+  client.query('UPDATE customers SET password = '+ req.body.password +' WHERE customer_email = '+ req.body.customer_email +' ');
 });
 
 /* ---------- CLIENT SIDE ---------- */
@@ -166,6 +204,7 @@ app.get('/', function (req, res) {
 });
 
 app.get('/profile/:id', function (req, res) {
+  if (req.isAuthenticated()) {
   var list = [];
   client.query('SELECT customers.first_name AS first_name,customers.last_name AS last_name,customers.customer_email AS customer_email,customers.street AS street,customers.municipality AS municipality,customers.province AS province,customers.zipcode AS zipcode,products.product_name AS product_name,orders.quantity AS quantity,orders.purchase_date AS purchase_date FROM orders INNER JOIN customers ON customers.customer_id=orders.customer_id INNER JOIN products ON products.product_id=orders.product_id WHERE customers.customer_id = ' + req.params.id + 'ORDER BY purchase_date DESC;')
     .then((result) => {
@@ -177,8 +216,11 @@ app.get('/profile/:id', function (req, res) {
     })
     .catch((err) => {
       console.log('error', err);
-      res.send('Error!');
+      res.redirect('/login');
     });
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get('/products', function (req, res) {
