@@ -187,8 +187,9 @@ app.get('/forgot-password', function (req, res) {
   });
 });
 
-app.post('/forgotpassword', (req, res) => {
+app.post('/forgot-password', (req, res) => {
   client.query("UPDATE customers SET password = '"+ req.body.password +"' WHERE customer_email = '"+ req.body.customer_email +"' ");
+  res.redirect('/login');
 });
 
 /* ---------- CLIENT SIDE ---------- */
