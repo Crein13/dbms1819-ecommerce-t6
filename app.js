@@ -188,7 +188,7 @@ app.get('/forgot-password', function (req, res) {
 });
 
 app.post('/forgotpassword', (req, res) => {
-  client.query('UPDATE customers SET password = '+ req.body.password +' WHERE customer_email = '+ req.body.customer_email +' ');
+  client.query("UPDATE customers SET password = '"+ req.body.password +"' WHERE customer_email = '"+ req.body.customer_email +"' ");
 });
 
 /* ---------- CLIENT SIDE ---------- */
