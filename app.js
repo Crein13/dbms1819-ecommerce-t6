@@ -161,18 +161,15 @@ app.get('/login', function (req, res) {
 app.post('/login',
   passport.authenticate('local', { failureRedirect: '/login' }),
   function(req, res) {
-    Customer.getById(req.user.customer_id, function(user){
-    role = user.user_type;
-    req.session.user = user.user_type;
-    console.log(req.session.user);
-    console.log('role:', role);
     if (role == 'customer'){
-        res.redirect('/')
+      res.redirect('/')
     }
     else if (role == 'admin'){
-        res.redirect('/admin')
+      res.redirect('/admin')
     }
-  });
+    else {
+      res.redirect('/login');
+    }
 });
 
 app.get('/signup', function (req, res) {
