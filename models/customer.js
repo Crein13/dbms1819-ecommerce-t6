@@ -1,10 +1,26 @@
 var Customer = {
-  getById: (client, customer_id, callback) => {
+  getById: (client, id, callback) => {
       const query =  `
-          SELECT * FROM customers WHERE customer_id = '${customer_id}'
+          SELECT * FROM customers WHERE customer_id = '${id}'
       `;
       client.query(query,(req,result)=>{
         callback(result.rows[0]);
+      });
+    },
+  getByEmail: (client,email,callback) => {
+    const query =  `
+          select * from customers where customer_email = '${email}'
+      `;
+      client.query(query,(req,result)=>{
+        callback(result.rows[0]);
+      });
+    },
+  getCustomerData: (client,id,callback) => {
+      const query =  `
+          select * from customers where customer_id = '${id.customer_id}'
+      `;
+      client.query(query,(req,result)=>{
+        callback(result.rows);
       });
     },
   getByCustomerId: (client, customerId, callback) => {
@@ -43,22 +59,6 @@ var Customer = {
       callback(customerData);
     });
   },
-  getByEmail: (client,customer_email,callback) => {
-    const query =  `
-          select * from customers where customer_email = '${customer_email}'
-      `;
-      client.query(query,(req,result)=>{
-        callback(result.rows[0]);
-      });
-    },
-  getCustomerData: (client,customer_id,callback) => {
-      const query =  `
-          select * from customers where customer_id = '${customer_id.customer_id}'
-      `;
-      client.query(query,(req,result)=>{
-        callback(result.rows);
-      });
-    },
   list: (client, filter, callback) => {
     const customerListQuery = `
       SELECT * FROM customers
