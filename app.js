@@ -124,6 +124,8 @@ function isAdmin(req, res, next) {
     }
     else{
       console.log('error', user);
+<<<<<<< HEAD
+=======
       res.send('cannot access!');
     }
   });
@@ -143,6 +145,27 @@ function isCustomer(req, res, next) {
         return next();
     }
     else{
+>>>>>>> module-6
+      res.send('cannot access!');
+    }
+  });
+  }
+  else{
+    console.log('error', user);
+    res.redirect('/login');
+  }
+}
+
+<<<<<<< HEAD
+function isCustomer(req, res, next) {
+  if (req.isAuthenticated()) {
+    Customer.getCustomerData(client,{id: req.user.customer_id}, function(user){
+    role = user[0].user_type;
+    console.log('role:', role);
+    if (role == 'customer') {
+        return next();
+    }
+    else{
       res.send('cannot access!');
     }
   });
@@ -152,6 +175,8 @@ function isCustomer(req, res, next) {
   }
 }
 
+=======
+>>>>>>> module-6
 /* -------------LOGIN PAGE ------------- */
 
 app.get('/login', function (req, res) {
