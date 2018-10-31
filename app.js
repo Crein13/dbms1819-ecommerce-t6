@@ -93,7 +93,7 @@ passport.use(new Strategy({
   passwordField: 'password'
 },
   function(email, password, cb) {
-    Customer.getByEmail(client, email, function(user) {
+    Customer.getByEmail(email, function(user) {
       if (!user) { return cb(null, false); }
       if (user.password != password) { return cb(null, false); }
       return cb(null, user);
@@ -106,7 +106,7 @@ passport.serializeUser(function(user, cb) {
 });
 
 passport.deserializeUser(function(customer_id, cb) {
-  Customer.getById(client, id, function (user) {
+  Customer.getById(id, function (user) {
     console.log('deserializeUser', user)
     cb(null, user);
   });
@@ -114,7 +114,7 @@ passport.deserializeUser(function(customer_id, cb) {
 
 function isAdmin(req, res, next) {
   if (req.isAuthenticated()) {
-    Customer.getCustomerData(client,{id: req.user.customer_id}, function(user){
+    Customer.getCustomerData({id: req.user.customer_id}, function(user){
     role = user[0].user_type;
     req.session.user = user.user_type;
     console.log(req.session.user)
@@ -136,7 +136,7 @@ function isAdmin(req, res, next) {
 
 function isCustomer(req, res, next) {
   if (req.isAuthenticated()) {
-    Customer.getCustomerData(client,{id: req.user.customer_id}, function(user){
+    Customer.getCustomerData({id: req.user.customer_id}, function(user){
     role = user[0].user_type;
     console.log('role:', role);
     if (role == 'customer') {
@@ -161,7 +161,7 @@ app.get('/login', function (req, res) {
 app.post('/login',
   passport.authenticate('local', { failureRedirect: '/login' }),
   function(req, res) {
-    Customer.getById(client, req.user.customer_id, function(user){
+    Customer.getById(req.user.customer_id, function(user){
     role = user.user_type;
     req.session.user = user.user_type;
     console.log(req.session.user);
