@@ -93,7 +93,7 @@ passport.use(new Strategy({
   passwordField: 'password'
 },
   function(email, password, cb) {
-    Customer.getByEmail(email, function(user) {
+    Customer.getByEmail(client, customer_email, function(user) {
       if (!user) { return cb(null, false); }
       if (user.password != password) { return cb(null, false); }
       return cb(null, user);
@@ -102,11 +102,11 @@ passport.use(new Strategy({
 
 passport.serializeUser(function(user, cb) {
   console.log('serializeUser', user)
-  cb(null, user.id);
+  cb(null, user.customer_id);
 });
 
-passport.deserializeUser(function(customer_id, cb) {
-  Customer.getById(id, function (user) {
+passport.deserializeUser(function(id, cb) {
+  Customer.getById(client, customer_id, function (user) {
     console.log('deserializeUser', user)
     cb(null, user);
   });
@@ -114,17 +114,17 @@ passport.deserializeUser(function(customer_id, cb) {
 
 function isAdmin(req, res, next) {
   if (req.isAuthenticated()) {
-    Customer.getCustomerData({id: req.user.customer_id}, function(user){
+    console.log(req.user);
+    Customer.getCustomerData(client, {id: req.user.customer_id}, function(user){
     role = user[0].user_type;
-    req.session.user = user.user_type;
-    console.log(req.session.user)
+    // req.session.user = user.user_type;
+    // console.log(req.session.user)
     console.log('role:', role);
     if (role == 'admin') {
         return next();
     }
     else{
-      console.log('error', user);
-      res.send('cannot access!');
+      res.redirect('/');
     }
   });
   }
@@ -134,23 +134,23 @@ function isAdmin(req, res, next) {
   }
 }
 
-function isCustomer(req, res, next) {
-  if (req.isAuthenticated()) {
-    Customer.getCustomerData({id: req.user.customer_id}, function(user){
-    role = user[0].user_type;
-    console.log('role:', role);
-    if (role == 'customer') {
-        return next();
-    }
-    else{
-      res.send('cannot access!');
-    }
-  });
-  }
-  else{
-    res.redirect('/login');
-  }
-}
+// function isCustomer(req, res, next) {
+//   if (req.isAuthenticated()) {
+//     Customer.getCustomerData({id: req.user.customer_id}, function(user){
+//     role = user[0].user_type;
+//     console.log('role:', role);
+//     if (role == 'customer') {
+//         return next();
+//     }
+//     else{
+//       res.send('cannot access!');
+//     }
+//   });
+//   }
+//   else{
+//     res.redirect('/login');
+//   }
+// }
 
 /* -------------LOGIN PAGE ------------- */
 

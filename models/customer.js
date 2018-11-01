@@ -1,5 +1,5 @@
 var Customer = {
-  getById: (id, callback) => {
+  getById: (client, id, callback) => {
       const query =  `
           SELECT * FROM customers WHERE customer_id = '${id}'
       `;
@@ -7,7 +7,7 @@ var Customer = {
         callback(result.rows[0]);
       });
     },
-  getByEmail: (email,callback) => {
+  getByEmail: (client, email,callback) => {
     const query =  `
           select * from customers where customer_email = '${email}'
       `;
@@ -15,7 +15,7 @@ var Customer = {
         callback(result.rows[0]);
       });
     },
-  getCustomerData: (id,callback) => {
+  getCustomerData: (client, id,callback) => {
       const query =  `
           select * from customers where customer_id = '${id.id}'
       `;
