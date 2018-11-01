@@ -93,7 +93,7 @@ passport.use(new Strategy({
   passwordField: 'password'
 },
   function(email, password, cb) {
-    Customer.getByEmail(client, customer_email, function(user) {
+    Customer.getByEmail(client, email, function(user) {
       if (!user) { return cb(null, false); }
       if (user.password != password) { return cb(null, false); }
       return cb(null, user);
@@ -106,7 +106,7 @@ passport.serializeUser(function(user, cb) {
 });
 
 passport.deserializeUser(function(id, cb) {
-  Customer.getById(client, customer_id, function (user) {
+  Customer.getById(client, id, function (user) {
     console.log('deserializeUser', user)
     cb(null, user);
   });
@@ -114,8 +114,8 @@ passport.deserializeUser(function(id, cb) {
 
 function isAdmin(req, res, next) {
   if (req.isAuthenticated()) {
-    console.log(req.user);
     Customer.getCustomerData(client, {id: req.user.customer_id}, function(user){
+    console.log(req.user);
     role = user[0].user_type;
     // req.session.user = user.user_type;
     // console.log(req.session.user)
@@ -161,7 +161,7 @@ app.get('/login', function (req, res) {
 app.post('/login',
   passport.authenticate('local', { failureRedirect: '/login' }),
   function(req, res) {
-  res.redirect('/admin');
+  res.redirect('/admin'); 
 });
 
 app.get('/signup', function (req, res) {
