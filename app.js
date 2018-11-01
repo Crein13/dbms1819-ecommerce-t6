@@ -129,7 +129,7 @@ function isAdmin(req, res, next) {
   });
   }
   else{
-    console.log('error', user);
+    console.log('error', req.user);
     res.redirect('/login');
   }
 }
@@ -193,10 +193,10 @@ app.get('/', function (req, res) {
   });
 });
 
-app.get('/profile/:id', function (req, res) {
+app.get('/profile', function (req, res) {
   if (req.isAuthenticated()) {
   var list = [];
-  client.query('SELECT customers.first_name AS first_name,customers.last_name AS last_name,customers.customer_email AS customer_email,customers.street AS street,customers.municipality AS municipality,customers.province AS province,customers.zipcode AS zipcode,products.product_name AS product_name,orders.quantity AS quantity,orders.purchase_date AS purchase_date FROM orders INNER JOIN customers ON customers.customer_id=orders.customer_id INNER JOIN products ON products.product_id=orders.product_id WHERE customers.customer_id = ' + req.params.id + 'ORDER BY purchase_date DESC;')
+  client.query("SELECT customers.first_name AS first_name, customers.last_name AS last_name, customers.customer_email AS customer_email, customers.street AS street, customers.municipality AS municipality ,customers.province AS province, customers.zipcode AS zipcode, products.product_name AS product_name, orders.quantity AS quantity, orders.purchase_date AS purchase_date FROM orders INNER JOIN customers ON customers.customer_id=orders.customer_id INNER JOIN products ON products.product_id=orders.product_id WHERE customers.customer_id = '" + req.user.customer_id + "' ORDER BY purchase_date DESC;")
     .then((result) => {
       list = result.rows;
       console.log('results?', result);
@@ -223,10 +223,23 @@ app.get('/products', function (req, res) {
 
 app.get('/products/:id', function (req, res) {
   if (req.isAuthenticated()){
-    Product.getById(client, req.params.id, function (productData) {
-      res.render('client/productdetail', productData);
+    client.query("SELECT products.product_id AS product_id, products.product_name AS product_name, products.product_picture AS product_picture, products.product_description AS product_description, products.product_price AS product_price, products.brand_tagline AS brand_tagline, products.warranty AS warranty, brands.brand_name AS brand_name, brands.brand_description AS brand_description, categories.category_name AS category_name FROM products INNER JOIN brands ON products.brand_id = brands.brand_id INNER JOIN categories ON products.category_id = categories.category_id WHERE products.product_id = '"+ req.params.id +"'")
+      .then((products) => {
+        client.query('SELECT * FROM customers WHERE customer_id = ' + req.user.customer_id + '; ')
+        .then((customerData) => {
+          console.log(customerData);
+          res.render('client/productdetail', {
+            product: products.rows,
+            customer: customerData.rows
+          });
+        });
+      })
+    .catch((err) => {
+      console.log('error', err);
+      res.send('Error!');
     });
-  } else {
+    }
+  else{
     res.redirect('/login');
   }
 });

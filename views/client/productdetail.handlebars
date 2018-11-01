@@ -4,6 +4,7 @@
       <div class="centered">    
       <div class="left">
       <div class="responsive">
+      {{#each product}}
         <div class="container col-lg-12 col-sm-12 col-md-12" style="width: 100%; margin-right: 18pt" >
           <div class="w3-display-container w3-hover-opacity" >
             <div class="container_pic"> 
@@ -47,7 +48,10 @@
                 <input id="product_name" name="product_name" type="text" value="{{this.product_name}}" readonly >
               </div>
             </div>
-
+            {{/each}}
+            {{#each customer}}
+            <input id="customer_email" name="customer_email" value="{{customer_email}}" type="hidden" placeholder="Email">
+            {{/each}}
             <div class="left" style="margin-top:10pt; margin-right:50%" >
             <div class="">
             <div class="text-center">
